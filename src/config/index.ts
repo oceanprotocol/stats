@@ -1,4 +1,4 @@
-const networks = [
+export const networks = [
   {
     name: 'Mainnet',
     subgraphUrl:
@@ -30,4 +30,3 @@ const networks = [
     chainId: 1285
   }
 ]
-export default networks

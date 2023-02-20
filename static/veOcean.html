@@ -36,7 +36,7 @@
 		async function getDeposits() {
 			const response = await fetch('/api/veOcean/deposits');
 			const data = await response.json();
-			console.log(data);
+			
 			
 
 			labels = [];
@@ -70,7 +70,7 @@
         async function getWithdraws() {
 			const response = await fetch('/api/veOcean/withdraws');
 			const data = await response.json();
-			console.log(data);
+			
 			
 
 			labels = [];

@@ -1,10 +1,16 @@
-import { getSubgraphUrlFromChainId } from '../helpers/index'
+import {
+  getSubgraphUrlFromChainId,
+  getYearAndWeek,
+  getWeeksOfYear
+} from '../helpers/index'
 import fetch from 'cross-fetch'
 
 export async function veGetWithdraws(from: number, to: number) {
   const subgraphUrl = getSubgraphUrlFromChainId(1)
   let skip = 0
   const deposits = {}
+  const weeks = getWeeksOfYear(from, to)
+  for (const week of weeks) deposits[week] = 0
   do {
     const query = {
       query: `query{
@@ -26,16 +32,8 @@ export async function veGetWithdraws(from: number, to: number) {
       break
     }
     for (const row of respJSON.data.veDeposits) {
-      const date = new Date(row.timestamp * 1000)
-      const year = date.getFullYear()
-      const oneJan = new Date(year, 0, 1)
-      const numberOfDays = Math.floor(
-        ((date as any) - (oneJan as any)) / (24 * 60 * 60 * 1000)
-      )
-      const week = Math.ceil((date.getDay() + 1 + numberOfDays) / 7)
-      const key = year + '-' + week
-      if (!(key in deposits)) deposits[key] = 0
-      deposits[key] += parseFloat(row.value)*-1
+      const key = getYearAndWeek(row.timestamp)
+      deposits[key] += parseFloat(row.value) * -1
     }
     // eslint-disable-next-line no-constant-condition
   } while (true)
@@ -45,6 +43,8 @@ export async function veGetDeposits(from: number, to: number) {
   const subgraphUrl = getSubgraphUrlFromChainId(1)
   let skip = 0
   const deposits = {}
+  const weeks = getWeeksOfYear(from, to)
+  for (const week of weeks) deposits[week] = 0
   do {
     const query = {
       query: `query{
@@ -66,15 +66,7 @@ export async function veGetDeposits(from: number, to: number) {
       break
     }
     for (const row of respJSON.data.veDeposits) {
-      const date = new Date(row.timestamp * 1000)
-      const year = date.getFullYear()
-      const oneJan = new Date(year, 0, 1)
-      const numberOfDays = Math.floor(
-        ((date as any) - (oneJan as any)) / (24 * 60 * 60 * 1000)
-      )
-      const week = Math.ceil((date.getDay() + 1 + numberOfDays) / 7)
-      const key = year + '-' + week
-      if (!(key in deposits)) deposits[key] = 0
+      const key = getYearAndWeek(row.timestamp)
       deposits[key] += parseFloat(row.value)
     }
     // eslint-disable-next-line no-constant-condition

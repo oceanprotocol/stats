@@ -4,7 +4,7 @@ import cors from 'cors'
 import bodyParser from 'body-parser'
 
 import veOceanRoutes from './routes/veOceanRoutes'
-
+import coreRoutes from './routes/core'
 dotenv.config()
 const app = express()
 const port = 3000
@@ -14,6 +14,7 @@ app.use(bodyParser.json())
 app.use('/', express.static('static'))
 
 app.use('/api/veOcean', veOceanRoutes)
+app.use('/api/core', coreRoutes)
 
 app.use(cors())
 

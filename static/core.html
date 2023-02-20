@@ -1,0 +1,61 @@
+<html>
+
+<head>
+	<script type="text/javascript" src=
+"https://code.jquery.com/jquery-1.12.0.min.js">
+	</script>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,
+								initial-scale=1">
+	<script src=
+"https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js">
+	</script>
+	<title>VeOcean</title>
+</head>
+
+<body>
+    <div class="chart-container" style="position: relative; height:300; width:800">
+        <canvas id="publishedNFTs"></canvas>
+    </div>
+    <script>
+
+		getPublishedNfts();
+        async function getPublishedNfts() {
+			const response = await fetch('/api/core/publishedNFT');
+			const data = await response.json();
+			
+			
+
+			labels = [];
+			values = [];
+            for (const [key, value] of Object.entries(data)){
+                labels.push(key)
+                values.push(value)
+            }
+			new Chart(document.getElementById("publishedNFTs"), {
+				type: 'bar',
+				data: {
+					labels: labels,
+					datasets: [
+						{
+							label: "NFTS Published",
+							data: values
+						}
+					]
+				},
+				options: {
+					legend: { display: false },
+					title: {
+						display: true,
+						text: 'NFTS Published'
+					}
+				}
+			});
+
+		}
+
+        
+	</script>
+</body>
+
+</html>
