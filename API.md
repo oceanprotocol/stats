@@ -66,3 +66,23 @@
     | `to`   | timestamp of end period     | path | no       | now           |
 
 
+### **Get** `/api/core/uniqueConsumers`
+
+- Description
+
+    Returns a json object which contains number of unique consumers each week on all production chains
+
+- Example
+```json
+{"2022-34":1,"2022-35":3,"2022-36":7,"2022-37":11,"2022-38":13,"2022-39":12,"2022-40":23,"2022-41":16,"2022-42":18,"2022-43":13,"2022-44":23,"2022-45":17,"2022-46":10,"2022-47":8,"2022-48":9,"2022-49":21,"2022-50":17,"2022-51":11,"2022-52":12,"2023-1":43,"2023-2":43,"2023-3":34,"2023-4":44,"2023-5":48,"2023-6":41,"2023-7":53,"2023-8":1}
+```
+
+- Parameters
+
+    | name   | description                 | in   | required | default       |
+    |--------|-----------------------------|------|----------|-------------- |
+    | `since`| timestamp of start period   | path | no       | 6 months ago  |
+    | `to`   | timestamp of end period     | path | no       | now           |
+
+
+
