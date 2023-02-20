@@ -1,0 +1,107 @@
+<html>
+
+<head>
+	<script type="text/javascript" src=
+"https://code.jquery.com/jquery-1.12.0.min.js">
+	</script>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,
+								initial-scale=1">
+	<script src=
+"https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js">
+	</script>
+	<title>VeOcean</title>
+</head>
+
+<body>
+    Total Locked Ocean:<div id="locked"></div>
+    <div class="chart-container" style="position: relative; height:300; width:800">
+        <canvas id="deposits"></canvas>
+    </div>
+    <div><br><br><br><br><br></div>
+    <div class="chart-container" style="position: relative; height:300; width:800">
+        <canvas id="withdraws"></canvas>
+    </div>
+	<script>
+
+		getLocked();
+        getDeposits();
+        getWithdraws();
+        
+        async function getLocked() {
+            const response = await fetch('/api/veOcean/lockedAmount');
+            const data = await response.text();
+            document.getElementById("locked").innerHTML = data
+        }
+		async function getDeposits() {
+			const response = await fetch('/api/veOcean/deposits');
+			const data = await response.json();
+			console.log(data);
+			
+
+			labels = [];
+			values = [];
+            for (const [key, value] of Object.entries(data)){
+                labels.push(key)
+                values.push(value)
+            }
+			new Chart(document.getElementById("deposits"), {
+				type: 'bar',
+				data: {
+					labels: labels,
+					datasets: [
+						{
+							label: "veOcean deposits",
+							data: values
+						}
+					]
+				},
+				options: {
+					legend: { display: false },
+					title: {
+						display: true,
+						text: 'veOcean deposits'
+					}
+				}
+			});
+
+		}
+
+        async function getWithdraws() {
+			const response = await fetch('/api/veOcean/withdraws');
+			const data = await response.json();
+			console.log(data);
+			
+
+			labels = [];
+			values = [];
+            for (const [key, value] of Object.entries(data)){
+                labels.push(key)
+                values.push(value)
+            }
+			new Chart(document.getElementById("withdraws"), {
+				type: 'bar',
+				data: {
+					labels: labels,
+					datasets: [
+						{
+							label: "veOcean withdraws",
+							data: values
+						}
+					]
+				},
+				options: {
+					legend: { display: false },
+					title: {
+						display: true,
+						text: 'veOcean withdraws'
+					}
+				}
+			});
+
+		}
+
+	</script>
+</body>
+
+</html>
