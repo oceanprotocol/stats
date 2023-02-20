@@ -85,4 +85,23 @@
     | `to`   | timestamp of end period     | path | no       | now           |
 
 
+### **Get** `/api/core/uniquePublishMarkets`
+
+- Description
+
+    Returns a json object which contains number of unique Publishing Markets each week on all production chains
+
+- Example
+```json
+{"2022-34":0,"2022-35":2,"2022-36":2,"2022-37":2,"2022-38":4,"2022-39":1,"2022-40":4,"2022-41":4,"2022-42":3,"2022-43":2,"2022-44":7,"2022-45":6,"2022-46":4,"2022-47":3,"2022-48":1,"2022-49":4,"2022-50":3,"2022-51":1,"2022-52":2,"2023-1":2,"2023-2":6,"2023-3":1,"2023-4":8,"2023-5":1,"2023-6":2,"2023-7":1,"2023-8":3}
+```
+
+- Parameters
+
+    | name   | description                 | in   | required | default       |
+    |--------|-----------------------------|------|----------|-------------- |
+    | `since`| timestamp of start period   | path | no       | 6 months ago  |
+    | `to`   | timestamp of end period     | path | no       | now           |
+
+
 

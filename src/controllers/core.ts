@@ -67,7 +67,68 @@ export async function getUniqueConsumers(from: number, to: number) {
   return results
 }
 
+// unique publishMarkers
+async function getUniquePublishMarketsPerWeek(
+  chainId: number,
+  from: number,
+  to: number
+) {
+  const subgraphUrl = getSubgraphUrlFromChainId(chainId)
+  let skip = 0
+  const nfts = {}
+  const weeks = getWeeksOfYear(from, to)
+  for (const week of weeks) nfts[week] = {}
+  do {
+    const query = {
+      query: `query{
+                tokens(where:{createdTimestamp_gte:${from} createdTimestamp_lt:${to} isDatatoken:true} skip:${skip}, first:1000 orderBy:createdTimestamp orderDirection:asc){
+                    createdTimestamp
+                    publishMarketFeeAddress
+                  }
+              }`
+    }
+    //console.log(query)
+    const response = await fetch(subgraphUrl, {
+      method: 'POST',
+      body: JSON.stringify(query)
+    })
+    const respJSON = await response.json()
+    skip = skip + 1000
+    if (!respJSON.data || respJSON.data.tokens.length < 1) {
+      break
+    }
+    for (const row of respJSON.data.tokens) {
+      const key = getYearAndWeek(row.createdTimestamp)
+      nfts[key][row.publishMarketFeeAddress] = true
+    }
+    // eslint-disable-next-line no-constant-condition
+  } while (true)
+  return nfts
+}
 
+export async function getUniquePublishMarkets(from: number, to: number) {
+  const prom = []
+  const results = {}
+  const weeks = getWeeksOfYear(from, to)
+  for (const week of weeks) results[week] = 0
+  let i = 0
+  for (const network of networks) {
+    prom[i] = getUniquePublishMarketsPerWeek(network.chainId, from, to)
+    i++
+  }
+  const allPromises = await Promise.all(prom)
+  for (const week of weeks) {
+    i = 0
+    for (const network of networks) {
+      results[week] += Object.keys(allPromises[i][week]).length
+      i++
+    }
+  }
+
+  return results
+}
+
+// nfts published
 async function getNoOfErc721PerChain(
   chainId: number,
   from: number,

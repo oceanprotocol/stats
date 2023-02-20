@@ -21,10 +21,16 @@
 	<div class="chart-container" style="position: relative; height:300; width:800">
         <canvas id="uniqueConsumers"></canvas>
     </div>
+	
+	<div><br><br><br><br><br></div>
+	<div class="chart-container" style="position: relative; height:300; width:800">
+        <canvas id="uniquePublishMarkets"></canvas>
+    </div>
     <script>
 
 		getPublishedNfts();
 		getUniqueConsumers();
+		getUniquePublishMarkets();
         async function getPublishedNfts() {
 			const response = await fetch('/api/core/publishedNFT');
 			const data = await response.json();
@@ -87,6 +93,40 @@
 					title: {
 						display: true,
 						text: 'Unique consumers per week'
+					}
+				}
+			});
+
+		}
+
+		async function getUniquePublishMarkets() {
+			const response = await fetch('/api/core/uniquePublishMarkets');
+			const data = await response.json();
+			
+			
+
+			labels = [];
+			values = [];
+            for (const [key, value] of Object.entries(data)){
+                labels.push(key)
+                values.push(value)
+            }
+			new Chart(document.getElementById("uniquePublishMarkets"), {
+				type: 'bar',
+				data: {
+					labels: labels,
+					datasets: [
+						{
+							label: "uniquePublishMarkets",
+							data: values
+						}
+					]
+				},
+				options: {
+					legend: { display: false },
+					title: {
+						display: true,
+						text: 'Unique Publishing Markets per week'
 					}
 				}
 			});
