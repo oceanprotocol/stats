@@ -26,11 +26,29 @@
 	<div class="chart-container" style="position: relative; height:300; width:800">
         <canvas id="uniquePublishMarkets"></canvas>
     </div>
+
+	<div><br><br><br><br><br></div>
+	<div class="chart-container" style="position: relative; height:300; width:800">
+        <canvas id="uniqueConsumeMarkets"></canvas>
+    </div>
+
+	<div><br><br><br><br><br></div>
+	<div class="chart-container" style="position: relative; height:300; width:800">
+        <canvas id="freeConsumes"></canvas>
+    </div>
+
+	<div><br><br><br><br><br></div>
+	<div class="chart-container" style="position: relative; height:300; width:800">
+        <canvas id="oceanConsumes"></canvas>
+    </div>
     <script>
 
 		getPublishedNfts();
 		getUniqueConsumers();
 		getUniquePublishMarkets();
+		getUniqueConsumeMarkets();
+		getFreeConsumes();
+		getOceanConsumes();
         async function getPublishedNfts() {
 			const response = await fetch('/api/core/publishedNFT');
 			const data = await response.json();
@@ -129,6 +147,112 @@
 						text: 'Unique Publishing Markets per week'
 					}
 				}
+			});
+
+		}
+
+		async function getUniqueConsumeMarkets() {
+			const response = await fetch('/api/core/uniqueConsumeMarkets');
+			const data = await response.json();
+			
+			
+
+			labels = [];
+			values = [];
+            for (const [key, value] of Object.entries(data)){
+                labels.push(key)
+                values.push(value)
+            }
+			new Chart(document.getElementById("uniqueConsumeMarkets"), {
+				type: 'bar',
+				data: {
+					labels: labels,
+					datasets: [
+						{
+							label: "uniqueConsumeMarkets",
+							data: values
+						}
+					]
+				},
+				options: {
+					legend: { display: false },
+					title: {
+						display: true,
+						text: 'Unique Consume Markets per week'
+					}
+				}
+			});
+
+		}
+
+
+
+		async function getFreeConsumes() {
+			const response = await fetch('/api/core/freeConsumes');
+			const data = await response.json();
+			
+			
+
+			labels = [];
+			values = [];
+            for (const [key, value] of Object.entries(data)){
+                labels.push(key)
+                values.push(value)
+            }
+			new Chart(document.getElementById("freeConsumes"), {
+				type: 'bar',
+				data: {
+					labels: labels,
+					datasets: [
+						{
+							label: "freeConsumes",
+							data: values
+						}
+					]
+				},
+				options: {
+					legend: { display: false },
+					title: {
+						display: true,
+						text: 'Free Consumes per week'
+					}
+				}
+			});
+
+		}
+
+		async function getOceanConsumes() {
+			const response = await fetch('/api/core/oceanConsumes');
+			const data = await response.json();
+			
+			labels = [];
+			values = [];
+            for (const [key, value] of Object.entries(data)){
+                labels.push(key)
+				let total=0
+				for (const [key2, value2] of Object.entries(value)){
+					total+=value[key2]	
+				}
+                values.push(total)
+            }
+			new Chart(document.getElementById("oceanConsumes"), {
+				type: 'bar',
+				data: {
+					labels: labels,
+					datasets: [
+						{
+							label: "oceanConsumes",
+							data: values
+						}
+					]
+				},
+				options: {
+					legend: { display: false },
+					title: {
+						display: true,
+						text: 'Ocean Consumes per week'
+					},
+				}	
 			});
 
 		}
