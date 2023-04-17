@@ -14,7 +14,6 @@ const router = express.Router()
 /* GET Access role premissions. */
 router.get('/lockedAmount', async function (req: Request, res: Response) {
   const lockedAmount = await veGetLockedAmount()
-  console.log('lockedAmount:' + lockedAmount)
   res.status(200).send('' + lockedAmount)
 })
 router.get(

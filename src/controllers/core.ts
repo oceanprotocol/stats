@@ -1,13 +1,17 @@
 import {
   getSubgraphUrlFromChainId,
   getYearAndWeek,
-  getWeeksOfYear
+  getWeeksOfYear,
+  getMontsOfYear,
+  getYearAndMonth,
+  getYears,
+  getYear
 } from '../helpers/index'
 import { networks } from '../config/index'
 import fetch from 'cross-fetch'
 
 // unique consumers per week
-async function getUniqueConsumersPerWeek(
+export async function getUniqueConsumersPerWeek(
   chainId: number,
   from: number,
   to: number
@@ -26,7 +30,6 @@ async function getUniqueConsumersPerWeek(
                   }
               }`
     }
-    //console.log(query)
     const response = await fetch(subgraphUrl, {
       method: 'POST',
       body: JSON.stringify(query)
@@ -87,7 +90,6 @@ async function getUniquePublishMarketsPerWeek(
                   }
               }`
     }
-    //console.log(query)
     const response = await fetch(subgraphUrl, {
       method: 'POST',
       body: JSON.stringify(query)
@@ -106,7 +108,110 @@ async function getUniquePublishMarketsPerWeek(
   return nfts
 }
 
-export async function getUniquePublishMarkets(from: number, to: number) {
+async function getUniquePublishMarketsPerMonth(
+  chainId: number,
+  from: number,
+  to: number
+) {
+  const subgraphUrl = getSubgraphUrlFromChainId(chainId)
+  let skip = 0
+  const nfts = {}
+  const months = getMontsOfYear(from, to)
+  for (const month of months) nfts[month] = {}
+  do {
+    const query = {
+      query: `query{
+                tokens(where:{createdTimestamp_gte:${from} createdTimestamp_lt:${to} isDatatoken:true} skip:${skip}, first:1000 orderBy:createdTimestamp orderDirection:asc){
+                    createdTimestamp
+                    publishMarketFeeAddress
+                  }
+              }`
+    }
+    const response = await fetch(subgraphUrl, {
+      method: 'POST',
+      body: JSON.stringify(query)
+    })
+    const respJSON = await response.json()
+    skip = skip + 1000
+    if (!respJSON.data || respJSON.data.tokens.length < 1) {
+      break
+    }
+    for (const row of respJSON.data.tokens) {
+      const key = getYearAndMonth(row.createdTimestamp)
+      nfts[key][row.publishMarketFeeAddress] = true
+    }
+    // eslint-disable-next-line no-constant-condition
+  } while (true)
+  return nfts
+}
+
+async function getUniquePublishMarketsPerYear(
+  chainId: number,
+  from: number,
+  to: number
+) {
+  const subgraphUrl = getSubgraphUrlFromChainId(chainId)
+  let skip = 0
+  const nfts = {}
+  const years = getYears(from, to)
+  for (const year of years) nfts[year] = {}
+  do {
+    const query = {
+      query: `query{
+                tokens(where:{createdTimestamp_gte:${from} createdTimestamp_lt:${to} isDatatoken:true} skip:${skip}, first:1000 orderBy:createdTimestamp orderDirection:asc){
+                    createdTimestamp
+                    publishMarketFeeAddress
+                  }
+              }`
+    }
+    const response = await fetch(subgraphUrl, {
+      method: 'POST',
+      body: JSON.stringify(query)
+    })
+    const respJSON = await response.json()
+    skip = skip + 1000
+    if (!respJSON.data || respJSON.data.tokens.length < 1) {
+      break
+    }
+    for (const row of respJSON.data.tokens) {
+      const key = getYear(row.createdTimestamp)
+      nfts[key][row.publishMarketFeeAddress] = true
+    }
+    // eslint-disable-next-line no-constant-condition
+  } while (true)
+  return nfts
+}
+
+async function getUniquePublishMarkets(chainId: number) {
+  const subgraphUrl = getSubgraphUrlFromChainId(chainId)
+  let skip = 0
+  const nfts = {}
+  do {
+    const query = {
+      query: `query{
+                tokens(where:{isDatatoken:true} skip:${skip}, first:1000 orderBy:createdTimestamp orderDirection:asc){
+                    createdTimestamp
+                    publishMarketFeeAddress
+                  }
+              }`
+    }
+    const response = await fetch(subgraphUrl, {
+      method: 'POST',
+      body: JSON.stringify(query)
+    })
+    const respJSON = await response.json()
+    skip = skip + 1000
+    if (!respJSON.data || respJSON.data.tokens.length < 1) {
+      break
+    }
+    for (const row of respJSON.data.tokens) {
+      nfts[row.publishMarketFeeAddress] = true
+    }
+    // eslint-disable-next-line no-constant-condition
+  } while (true)
+  return nfts
+}
+export async function getWeeklyUniquePublishMarkets(from: number, to: number) {
   const prom = []
   const results = {}
   const weeks = getWeeksOfYear(from, to)
@@ -116,6 +221,7 @@ export async function getUniquePublishMarkets(from: number, to: number) {
     prom[i] = getUniquePublishMarketsPerWeek(network.chainId, from, to)
     i++
   }
+
   const allPromises = await Promise.all(prom)
   for (const week of weeks) {
     i = 0
@@ -124,12 +230,70 @@ export async function getUniquePublishMarkets(from: number, to: number) {
       i++
     }
   }
+  return results
+}
 
+export async function getMontlyUniquePublishMarkets(from: number, to: number) {
+  const prom = []
+  const results = {}
+  const months = getMontsOfYear(from, to)
+  for (const month of months) results[month] = 0
+  let i = 0
+  for (const network of networks) {
+    prom[i] = getUniquePublishMarketsPerMonth(network.chainId, from, to)
+    i++
+  }
+  const allPromises = await Promise.all(prom)
+  for (const month of months) {
+    i = 0
+    for (const network of networks) {
+      results[month] += Object.keys(allPromises[i][month]).length
+      i++
+    }
+  }
+  return results
+}
+
+export async function getYearlyUniquePublishMarkets(from: number, to: number) {
+  const prom = []
+  const results = {}
+  const years = getYears(from, to)
+  for (const year of years) results[year] = 0
+  let i = 0
+  for (const network of networks) {
+    prom[i] = getUniquePublishMarketsPerYear(network.chainId, from, to)
+    i++
+  }
+  const allPromises = await Promise.all(prom)
+  for (const year of years) {
+    i = 0
+    for (const network of networks) {
+      results[year] += Object.keys(allPromises[i][year]).length
+      i++
+    }
+  }
+  return results
+}
+
+export async function getUniquePublishMarketsNumber() {
+  const prom = []
+  let results = 0
+  let i = 0
+  for (const network of networks) {
+    prom[i] = getUniquePublishMarkets(network.chainId)
+    i++
+  }
+  const allPromises = await Promise.all(prom)
+  i = 0
+  for (const network of networks) {
+    results += Object.keys(allPromises[i]).length
+    i++
+  }
   return results
 }
 
 // unique ConsumeMarkers
-async function getUniqueConsumeMarketsPerWeek(
+export async function getUniqueConsumeMarketsPerWeek(
   chainId: number,
   from: number,
   to: number
@@ -148,7 +312,6 @@ async function getUniqueConsumeMarketsPerWeek(
                   }
               }`
     }
-    //console.log(query)
     const response = await fetch(subgraphUrl, {
       method: 'POST',
       body: JSON.stringify(query)
@@ -191,7 +354,7 @@ export async function getUniqueConsumeMarkets(from: number, to: number) {
 }
 
 // nfts published
-async function getNoOfErc721PerChain(
+export async function getNoOfErc721PerChain(
   chainId: number,
   from: number,
   to: number
@@ -251,7 +414,7 @@ export async function getNoOfErc721(from: number, to: number) {
 }
 
 // free orders
-async function getFreeOrdersPerChain(
+export async function getFreeOrdersPerChain(
   chainId: number,
   from: number,
   to: number
@@ -311,7 +474,7 @@ export async function getFreeOrders(from: number, to: number) {
 }
 
 // free orders
-async function getOceanOrdersPerChain(
+export async function getOceanOrdersPerChain(
   chainId: number,
   from: number,
   to: number,
