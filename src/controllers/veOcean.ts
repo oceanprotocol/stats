@@ -135,3 +135,58 @@ export async function veGetLockedAmount() {
 
   return respJSON.data.veDeposits[0].totalOceanLocked
 }
+
+export async function veGetWeeklyAllocations(from: number, to: number) {
+  const subgraphUrl = getSubgraphUrlFromChainId(1)
+  let skip = 0
+  const deposits = {}
+  const unique_per_week = {}
+  const weeks = getWeeksOfYear(from, to)
+  for (const week of weeks) {
+    deposits[week] = {}
+    deposits[week]['updates'] = 0
+    deposits[week]['unique'] = 0
+    unique_per_week[week] = {} //temporary, to compute unique no of users
+  }
+  do {
+    const query = {
+      query: `query{
+                  veAllocationUpdates(where:{timestamp_gte:${from} timestamp_lt:${to}} skip:${skip}, first:1000 orderBy:timestamp orderDirection:asc){
+                    timestamp
+                    veAllocation{
+                      nftAddress
+                      chainId
+                      allocated
+                      allocationUser{
+                        veOcean{
+                          id
+                          lockedAmount
+                          unlockTime
+                        }
+                      }
+                    }
+                  }
+              }`
+    }
+    //console.log(query)
+    const response = await fetch(subgraphUrl, {
+      method: 'POST',
+      body: JSON.stringify(query)
+    })
+    const respJSON = await response.json()
+    skip = skip + 1000
+    if (!respJSON.data || respJSON.data.veAllocationUpdates.length < 1) {
+      break
+    }
+    for (const row of respJSON.data.veAllocationUpdates) {
+      const key = getYearAndWeek(row.timestamp)
+      deposits[key]['updates'] = deposits[key]['updates'] + 1
+      unique_per_week[key][row.veAllocation.allocationUser.veOcean.id] = true
+    }
+
+    // eslint-disable-next-line no-constant-condition
+  } while (true)
+  for (const week of weeks)
+    deposits[week]['unique'] = Object.keys(unique_per_week[week]).length
+  return deposits
+}

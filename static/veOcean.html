@@ -24,18 +24,19 @@
         <canvas id="deposits"></canvas>
     </div>
     <div><br><br><br><br><br></div>
-	<div class="chart-container" style="position: relative; height:300; width:800">
+    <div class="chart-container" style="position: relative; height:300; width:800">
         <canvas id="actions"></canvas>
     </div>
-    <div><br><br><br><br><br></div>
+	<div><br><br><br><br><br></div>
     <div class="chart-container" style="position: relative; height:300; width:800">
-        <canvas id="users"></canvas>
+        <canvas id="allocations"></canvas>
     </div>
 	<script>
 
 		getWeeklyLocked();
         getActions();
         getDeposits();
+		getAllocations();
 		
         
         async function getWeeklyLocked() {
@@ -100,7 +101,7 @@
 					]
 				},
 				options: {
-					legend: { display: false },
+					legend: { display: true },
 					title: {
 						display: true,
 						text: 'veOcean deposits/withdraws per week'
@@ -140,23 +141,68 @@
 					]
 				},
 				options: {
-        scales: {
-            xAxes: [{
-              stacked: true
-            }],
-            yAxes: [{
-              stacked: true
-            }]
-          },
-        legend: {
-            display: true,
-        },
-        maintainAspectRatio: false,
-    }
-				
+        			scales: {
+            			xAxes: [{
+              				stacked: false
+            			}],
+            			yAxes: [{
+              				stacked: true
+            			}]
+          			},
+					title: {
+							display: true,
+							text: 'veOcean actions per week'
+					},
+        			legend: {
+            			display: true,
+						
+        			}
+    			}
 			});
 		}
 
+		
+		async function getAllocations() {
+			const response = await fetch('/api/veOcean/allocations');
+			const data = await response.json();
+			labels = [];
+			allocations = [];
+			uniqueUsers=[];
+			for (const [key, value] of Object.entries(data)){
+				labels.push(key)
+				
+				allocations.push(value['updates'])
+				uniqueUsers.push(value['unique'])
+            }
+			new Chart(document.getElementById("allocations"), {
+				type: 'bar',
+				data: {
+					labels: labels,
+					datasets: [
+						{	label: "No of updates",data: allocations,backgroundColor: '#FF0000'},
+						{	label: "Unique users",data: uniqueUsers, backgroundColor: '#196384'},
+					]
+				},
+				options: {
+        			scales: {
+            			xAxes: [{
+              				stacked: false
+            			}],
+            			yAxes: [{
+              				stacked: false
+            			}]
+          			},
+					title: {
+							display: true,
+							text: 'Allocations per week'
+					},
+        			legend: {
+            			display: true,
+						
+        			}
+    			}
+			});
+		}
 		
 
 	</script>
