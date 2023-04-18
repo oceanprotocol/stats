@@ -53,7 +53,7 @@
 					labels: [],
 					datasets: [
 						{
-							label: "veOcean weekly locked",
+							label: "Ocean locked",
 							data: []
 						}
 					]
@@ -158,7 +158,7 @@
         async function getWeeklyLocked() {
 			chartWeeklyLocked.data.labels=[]
 			chartWeeklyLocked.data.datasets[0].data=[]
-			chartWeeklyLocked.options.title.text="veOcean locked per week"
+			chartWeeklyLocked.options.title.text="Ocean locked"
             const response = await fetch('/api/veOcean/weeklyLockedAmount');
             const data = await response.json();
             for (const [key, value] of Object.entries(data)){
