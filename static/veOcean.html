@@ -32,33 +32,29 @@
         <canvas id="allocations"></canvas>
     </div>
 	<script>
+		let chartWeeklyLocked=null
+		let chartActions=null
+		let chartDeposits=null
+		let chartAllocations=null
+		createCharts()
+		updateCharts()
 
-		getWeeklyLocked();
-        getActions();
-        getDeposits();
-		getAllocations();
+		function updateCharts(){
+			getWeeklyLocked();
+        	getActions();
+        	getDeposits();
+			getAllocations();
+		}
 		
-        
-        async function getWeeklyLocked() {
-            const response = await fetch('/api/veOcean/weeklyLockedAmount');
-            const data = await response.json();
-			
-			
-
-			labels = [];
-			values = [];
-            for (const [key, value] of Object.entries(data)){
-                labels.push(key)
-                values.push(value)
-            }
-			new Chart(document.getElementById("weeklyLocked"), {
+		function createCharts(){
+			chartWeeklyLocked=new Chart(document.getElementById("weeklyLocked"), {
 				type: 'bar',
 				data: {
-					labels: labels,
+					labels: [],
 					datasets: [
 						{
 							label: "veOcean weekly locked",
-							data: values
+							data: []
 						}
 					]
 				},
@@ -67,77 +63,20 @@
 					legend: { display: false },
 					title: {
 						display: true,
-						text: 'veOcean locked per week'
+						text: 'Loading chart....'
 					}
 				}
 			});
-        }
-		async function getDeposits() {
-			const response = await fetch('/api/veOcean/deposits');
-			const data = await response.json();
-			labels = [];
-			deposits = []; // type = 0
-			withdraws=[];//type = 4
-			for (const [key, value] of Object.entries(data)){
-				labels.push(key)
-				deposits.push(value['0']+value['1']+value['2'])
-				withdraws.push(value['4'])
-            }
-			new Chart(document.getElementById("deposits"), {
+		chartActions=new Chart(document.getElementById("actions"), {
 				type: 'bar',
 				data: {
-					labels: labels,
+					labels: [],
 					datasets: [
-						{
-							label: "veOcean deposits",
-							data: deposits,
-							backgroundColor: '#7CFC00',
-						},
-						{
-							label: "veOcean withdraws",
-							data: withdraws,
-							backgroundColor: '#FF0000',
-						}
-					]
-				},
-				options: {
-					legend: { display: true },
-					title: {
-						display: true,
-						text: 'veOcean deposits/withdraws per week'
-					}
-				}
-				
-			});
-		}
-		async function getActions() {
-			const response = await fetch('/api/veOcean/actions');
-			const data = await response.json();
-			labels = [];
-			deposits = []; // type = 0
-			createLocks=[]; //type = 1
-			increaseLockAmount=[]; // type = 2
-			increaseUnlockTime=[]; // type = 3
-			withdraws=[];//type = 4
-			for (const [key, value] of Object.entries(data)){
-				labels.push(key)
-				
-				deposits.push(value['0'])
-				createLocks.push(value['1'])
-				increaseLockAmount.push(value['2'])
-				increaseUnlockTime.push(value['3'])
-				withdraws.push(value['4'])
-            }
-			new Chart(document.getElementById("actions"), {
-				type: 'bar',
-				data: {
-					labels: labels,
-					datasets: [
-						{	label: "DEPOSIT_FOR",data: deposits,backgroundColor: '#FF0000'},
-						{	label: "CREATE_LOCK",data: createLocks, backgroundColor: '#196384'},
-						{	label: "INCREASE_LOCK_AMOUNT",data: increaseLockAmount, backgroundColor: '#FF00FF'},
-						{	label: "INCREASE_UNLOCK_TIME",data: increaseUnlockTime, backgroundColor: '#7DF9FF'},
-						{	label: "WITHDRAW",data: withdraws, backgroundColor: '#FFBF00'}
+						{	label: "DEPOSIT_FOR",data: [],backgroundColor: '#FF0000'},
+						{	label: "CREATE_LOCK",data: [], backgroundColor: '#196384'},
+						{	label: "INCREASE_LOCK_AMOUNT",data: [], backgroundColor: '#FF00FF'},
+						{	label: "INCREASE_UNLOCK_TIME",data: [], backgroundColor: '#7DF9FF'},
+						{	label: "WITHDRAW",data: [], backgroundColor: '#FFBF00'}
 					]
 				},
 				options: {
@@ -151,7 +90,7 @@
           			},
 					title: {
 							display: true,
-							text: 'veOcean actions per week'
+							text: 'Loading chart..'
 					},
         			legend: {
             			display: true,
@@ -159,31 +98,40 @@
         			}
     			}
 			});
-		}
-
-		
-		async function getAllocations() {
-			const response = await fetch('/api/veOcean/allocations');
-			const data = await response.json();
-			labels = [];
-			allocations = [];
-			uniqueUsers=[];
-			txs=[];
-			for (const [key, value] of Object.entries(data)){
-				labels.push(key)
-				
-				allocations.push(value['updates'])
-				uniqueUsers.push(value['unique'])
-				txs.push(value['txs'])
-            }
-			new Chart(document.getElementById("allocations"), {
+		chartDeposits=new Chart(document.getElementById("deposits"), {
 				type: 'bar',
 				data: {
-					labels: labels,
+					labels: [],
 					datasets: [
-						{	label: "No of datasets",data: allocations,backgroundColor: '#FF0000'},
-						{	label: "Unique users",data: uniqueUsers, backgroundColor: '#196384'},
-						{	label: "No of txs",data: txs, backgroundColor: '#FF00FF'},
+						{
+							label: "veOcean deposits",
+							data: [],
+							backgroundColor: '#7CFC00',
+						},
+						{
+							label: "veOcean withdraws",
+							data: [],
+							backgroundColor: '#FF0000',
+						}
+					]
+				},
+				options: {
+					legend: { display: true },
+					title: {
+						display: true,
+						text: 'Loading chart....'
+					}
+				}
+				
+			});
+		chartAllocations=new Chart(document.getElementById("allocations"), {
+				type: 'bar',
+				data: {
+					labels: [],
+					datasets: [
+						{	label: "No of datasets",data: [],backgroundColor: '#FF0000'},
+						{	label: "Unique users",data: [], backgroundColor: '#196384'},
+						{	label: "No of txs",data: [], backgroundColor: '#FF00FF'},
 					]
 				},
 				options: {
@@ -197,7 +145,7 @@
           			},
 					title: {
 							display: true,
-							text: 'Allocations per week'
+							text: 'Loading chart...'
 					},
         			legend: {
             			display: true,
@@ -205,6 +153,74 @@
         			}
     			}
 			});
+		}
+        
+        async function getWeeklyLocked() {
+			chartWeeklyLocked.data.labels=[]
+			chartWeeklyLocked.data.datasets[0].data=[]
+			chartWeeklyLocked.options.title.text="veOcean locked per week"
+            const response = await fetch('/api/veOcean/weeklyLockedAmount');
+            const data = await response.json();
+            for (const [key, value] of Object.entries(data)){
+                chartWeeklyLocked.data.labels.push(key)
+                chartWeeklyLocked.data.datasets[0].data.push(value)
+            }
+			chartWeeklyLocked.update()
+			
+        }
+		async function getDeposits() {
+			chartDeposits.data.labels=[]
+			chartDeposits.data.datasets[0].data=[]
+			chartDeposits.data.datasets[1].data=[]
+			chartDeposits.options.title.text="veOcean deposits/withdraws per week"
+			const response = await fetch('/api/veOcean/deposits');
+			const data = await response.json();
+			for (const [key, value] of Object.entries(data)){
+				chartDeposits.data.labels.push(key)
+				chartDeposits.data.datasets[0].data.push(value['0']+value['1']+value['2'])
+				chartDeposits.data.datasets[1].data.push(value['4'])
+            }
+			chartDeposits.update()
+			
+		}
+		async function getActions() {
+			chartActions.data.labels=[]
+			chartActions.data.datasets[0].data=[]
+			chartActions.data.datasets[1].data=[]
+			chartActions.data.datasets[2].data=[]
+			chartActions.data.datasets[3].data=[]
+			chartActions.data.datasets[4].data=[]
+			chartActions.options.title.text="veOcean actions per week"
+			
+			const response = await fetch('/api/veOcean/actions');
+			const data = await response.json();
+			for (const [key, value] of Object.entries(data)){
+				chartActions.data.labels.push(key)
+				chartActions.data.datasets[0].data.push(value['0'])
+				chartActions.data.datasets[1].data.push(value['1'])
+				chartActions.data.datasets[2].data.push(value['2'])
+				chartActions.data.datasets[3].data.push(value['3'])
+				chartActions.data.datasets[4].data.push(value['4'])
+            }
+			chartActions.update()
+		}
+
+		
+		async function getAllocations() {
+			chartAllocations.data.labels=[]
+			chartAllocations.data.datasets[0].data=[]
+			chartAllocations.data.datasets[1].data=[]
+			chartAllocations.data.datasets[2].data=[]
+			chartAllocations.options.title.text="Allocations per week"
+            const response = await fetch('/api/veOcean/allocations');
+			const data = await response.json();
+			for (const [key, value] of Object.entries(data)){
+				chartAllocations.data.labels.push(key)
+				chartAllocations.data.datasets[0].data.push(value['updates'])
+				chartAllocations.data.datasets[1].data.push(value['unique'])
+				chartAllocations.data.datasets[2].data.push(value['txs'])
+            }
+			chartAllocations.update()
 		}
 		
 
