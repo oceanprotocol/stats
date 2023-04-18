@@ -168,19 +168,22 @@
 			labels = [];
 			allocations = [];
 			uniqueUsers=[];
+			txs=[];
 			for (const [key, value] of Object.entries(data)){
 				labels.push(key)
 				
 				allocations.push(value['updates'])
 				uniqueUsers.push(value['unique'])
+				txs.push(value['txs'])
             }
 			new Chart(document.getElementById("allocations"), {
 				type: 'bar',
 				data: {
 					labels: labels,
 					datasets: [
-						{	label: "No of updates",data: allocations,backgroundColor: '#FF0000'},
+						{	label: "No of datasets",data: allocations,backgroundColor: '#FF0000'},
 						{	label: "Unique users",data: uniqueUsers, backgroundColor: '#196384'},
+						{	label: "No of txs",data: txs, backgroundColor: '#FF00FF'},
 					]
 				},
 				options: {

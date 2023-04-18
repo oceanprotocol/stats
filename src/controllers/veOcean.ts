@@ -141,18 +141,21 @@ export async function veGetWeeklyAllocations(from: number, to: number) {
   let skip = 0
   const deposits = {}
   const unique_per_week = {}
+  const tx_per_week = {}
   const weeks = getWeeksOfYear(from, to)
   for (const week of weeks) {
     deposits[week] = {}
     deposits[week]['updates'] = 0
     deposits[week]['unique'] = 0
     unique_per_week[week] = {} //temporary, to compute unique no of users
+    tx_per_week[week] = {} //temporary, to compute unique no of txs
   }
   do {
     const query = {
       query: `query{
                   veAllocationUpdates(where:{timestamp_gte:${from} timestamp_lt:${to}} skip:${skip}, first:1000 orderBy:timestamp orderDirection:asc){
                     timestamp
+                    tx
                     veAllocation{
                       nftAddress
                       chainId
@@ -182,11 +185,14 @@ export async function veGetWeeklyAllocations(from: number, to: number) {
       const key = getYearAndWeek(row.timestamp)
       deposits[key]['updates'] = deposits[key]['updates'] + 1
       unique_per_week[key][row.veAllocation.allocationUser.veOcean.id] = true
+      tx_per_week[key][row.tx] = true
     }
 
     // eslint-disable-next-line no-constant-condition
   } while (true)
-  for (const week of weeks)
+  for (const week of weeks) {
     deposits[week]['unique'] = Object.keys(unique_per_week[week]).length
+    deposits[week]['txs'] = Object.keys(tx_per_week[week]).length
+  }
   return deposits
 }
