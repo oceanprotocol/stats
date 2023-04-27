@@ -10,15 +10,23 @@
 	<script src=
 "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js">
 	</script>
+	<script src="helpers.js"></script>  
 	<title>VeOcean</title>
 </head>
 
 <body>
-    
-	
-    <div class="chart-container" style="position: relative; height:300; width:800">
+    <div align="center">
+	<select id="perios" onchange="refetch(this)">
+		<option value=1>Last 3 months</option>
+		<option selected value=2>Last 6 months</option>
+		<option value=3>Last 1 year</option>
+	</select>
+	</div>
+	<div><br><br><br><br><br></div>
+    <a id=chart_weeklyLocked><div class="chart-container" style="position: relative; height:300; width:800">
         <canvas id="weeklyLocked"></canvas>
     </div>
+	</a>
 	<div><br><br><br><br><br></div>
     <div class="chart-container" style="position: relative; height:300; width:800">
         <canvas id="deposits"></canvas>
@@ -36,14 +44,30 @@
 		let chartActions=null
 		let chartDeposits=null
 		let chartAllocations=null
+		let to=Math.floor(Date.now() / 1000)
+    	let from = to - 15780000
 		createCharts()
 		updateCharts()
 
-		function updateCharts(){
-			getWeeklyLocked();
-        	getActions();
-        	getDeposits();
-			getAllocations();
+		async function refetch(obj){
+			switch(parseInt(obj.value)){
+				case 1: // 3 monts
+					from = to - 15780000/2
+					break
+				case 2: // 1 year
+					from = to - 15780000
+					break
+				default:
+					from = to - 15780000*2
+					break
+			}
+			await updateCharts();
+		}
+		async function updateCharts(){
+			await getWeeklyLocked();
+        	await getActions();
+        	await getDeposits();
+			await getAllocations();
 		}
 		
 		function createCharts(){
@@ -156,10 +180,8 @@
 		}
         
         async function getWeeklyLocked() {
-			chartWeeklyLocked.data.labels=[]
-			chartWeeklyLocked.data.datasets[0].data=[]
-			chartWeeklyLocked.options.title.text="Ocean locked"
-            const response = await fetch('/api/veOcean/weeklyLockedAmount');
+			clearChart(chartWeeklyLocked,"Ocean locked")
+			const response = await fetch('/api/veOcean/weeklyLockedAmount?since='+from+'&limit='+to);
             const data = await response.json();
             for (const [key, value] of Object.entries(data)){
                 chartWeeklyLocked.data.labels.push(key)
@@ -169,11 +191,8 @@
 			
         }
 		async function getDeposits() {
-			chartDeposits.data.labels=[]
-			chartDeposits.data.datasets[0].data=[]
-			chartDeposits.data.datasets[1].data=[]
-			chartDeposits.options.title.text="veOcean deposits/withdraws per week"
-			const response = await fetch('/api/veOcean/deposits');
+			clearChart(chartDeposits,"veOcean deposits/withdraws per week")
+			const response = await fetch('/api/veOcean/deposits?since='+from+'&limit='+to);
 			const data = await response.json();
 			for (const [key, value] of Object.entries(data)){
 				chartDeposits.data.labels.push(key)
@@ -184,15 +203,8 @@
 			
 		}
 		async function getActions() {
-			chartActions.data.labels=[]
-			chartActions.data.datasets[0].data=[]
-			chartActions.data.datasets[1].data=[]
-			chartActions.data.datasets[2].data=[]
-			chartActions.data.datasets[3].data=[]
-			chartActions.data.datasets[4].data=[]
-			chartActions.options.title.text="veOcean actions per week"
-			
-			const response = await fetch('/api/veOcean/actions');
+			clearChart(chartActions,"veOcean actions per week")
+			const response = await fetch('/api/veOcean/actions?since='+from+'&limit='+to);
 			const data = await response.json();
 			for (const [key, value] of Object.entries(data)){
 				chartActions.data.labels.push(key)
@@ -207,12 +219,8 @@
 
 		
 		async function getAllocations() {
-			chartAllocations.data.labels=[]
-			chartAllocations.data.datasets[0].data=[]
-			chartAllocations.data.datasets[1].data=[]
-			chartAllocations.data.datasets[2].data=[]
-			chartAllocations.options.title.text="Allocations per week"
-            const response = await fetch('/api/veOcean/allocations');
+			clearChart(chartAllocations,"Allocations per week")
+			const response = await fetch('/api/veOcean/allocations?since='+from+'&limit='+to);
 			const data = await response.json();
 			for (const [key, value] of Object.entries(data)){
 				chartAllocations.data.labels.push(key)
