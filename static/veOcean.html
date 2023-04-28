@@ -47,7 +47,8 @@
 		let to=Math.floor(Date.now() / 1000)
     	let from = to - 15780000
 		createCharts()
-		updateCharts()
+		updateCharts();
+		
 
 		async function refetch(obj){
 			switch(parseInt(obj.value)){
@@ -61,13 +62,17 @@
 					from = to - 15780000*2
 					break
 			}
+			document.getElementById("perios").disabled = true;
 			await updateCharts();
+			document.getElementById("perios").disabled = false;
 		}
 		async function updateCharts(){
-			await getWeeklyLocked();
-        	await getActions();
-        	await getDeposits();
-			await getAllocations();
+			let proms=[]
+			proms.push(getWeeklyLocked())
+        	proms.push(getActions())
+        	proms.push(getDeposits())
+			proms.push(getAllocations())
+			await Promise.all(proms)
 		}
 		
 		function createCharts(){
