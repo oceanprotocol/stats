@@ -62,17 +62,17 @@
 					from = to - 15780000*2
 					break
 			}
-			document.getElementById("perios").disabled = true;
 			await updateCharts();
-			document.getElementById("perios").disabled = false;
 		}
 		async function updateCharts(){
+			document.getElementById("perios").disabled = true;
 			let proms=[]
 			proms.push(getWeeklyLocked())
         	proms.push(getActions())
         	proms.push(getDeposits())
 			proms.push(getAllocations())
 			await Promise.all(proms)
+			document.getElementById("perios").disabled = false;
 		}
 		
 		function createCharts(){

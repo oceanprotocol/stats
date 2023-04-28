@@ -90,11 +90,11 @@
 					from = to - 15780000*2
 					break
 			}
-			document.getElementById("perios").disabled = true;
 			await updateCharts();
-			document.getElementById("perios").disabled = false;
+			
 		}
 		async function updateCharts(){
+			document.getElementById("perios").disabled = true;
 			let proms=[]
 			proms.push(getPublishedNfts())
 			proms.push(getUniqueConsumers())
@@ -106,6 +106,7 @@
 			proms.push(getFreeConsumes())
 			proms.push(getOceanConsumes())
 			await Promise.all(proms)
+			document.getElementById("perios").disabled = false;
 
 		}
 
