@@ -55,7 +55,11 @@
 
 	<div><br><br><br><br><br></div>
 	<div class="chart-container" style="position: relative; height:300; width:800">
-        <canvas id="freeConsumes"></canvas>
+        <canvas id="allConsumes"></canvas>
+    </div>
+	<div><br><br><br><br><br></div>
+	<div class="chart-container" style="position: relative; height:300; width:800">
+        <canvas id="noOfConsumes"></canvas>
     </div>
 
 	<div><br><br><br><br><br></div>
@@ -69,7 +73,8 @@
 		let chartMontlyUniquePublishMarkets=null
 		let chartYearlyUniquePublishMarkets=null
 		let chartUniqueConsumeMarkets=null
-		let chartFreeConsumes=null
+		let chartAllConsumes=null
+		let chartNoOfConsumes=null
 		let chartOceanConsumes=null
 
 		let to=Math.floor(Date.now() / 1000)
@@ -103,7 +108,7 @@
 			proms.push(getYearlyUniquePublishMarkets())
 			proms.push(getUniquePublishMarkets())
 			proms.push(getUniqueConsumeMarkets())
-			proms.push(getFreeConsumes())
+			proms.push(getConsumes())
 			proms.push(getOceanConsumes())
 			await Promise.all(proms)
 			document.getElementById("perios").disabled = false;
@@ -246,13 +251,41 @@
 				}
 			});
 
-			chartFreeConsumes = new Chart(document.getElementById("freeConsumes"), {
+			chartAllConsumes=new Chart(document.getElementById("allConsumes"), {
+				type: 'bar',
+				data: {
+					labels: [],
+					datasets: [
+						{	label: "Free",data: [],backgroundColor: '#FF0000'},
+						{	label: "Paid",data: [], backgroundColor: '#196384'},
+					]
+				},
+				options: {
+        			scales: {
+            			xAxes: [{
+              				stacked: false
+            			}],
+            			yAxes: [{
+              				stacked: true
+            			}]
+          			},
+					title: {
+							display: true,
+							text: 'Loading chart..'
+					},
+        			legend: {
+            			display: true,
+						
+        			}
+    			}
+			});
+			chartNoOfConsumes = new Chart(document.getElementById("noOfConsumes"), {
 				type: 'bar',
 				data: {
 					labels: [],
 					datasets: [
 						{
-							label: "freeConsumes",
+							label: "No of consumes",
 							data: []
 						}
 					]
@@ -262,7 +295,7 @@
 					title: {
 						fontFamily: 'sans-serif',
 						display: true,
-						text: 'Free Consumes per week'
+						text: 'Loading chart'
 					}
 				}
 			});
@@ -362,15 +395,25 @@
 			chartUniqueConsumeMarkets.update()
 		}
 
-		async function getFreeConsumes() {
-			clearChart(chartFreeConsumes,'Free Consumes per week')
+		async function getConsumes() {
+			// we are updating both charts here
+			clearChart(chartAllConsumes,'Free/Paid Consumes # per week')
+			clearChart(chartNoOfConsumes,'Total Consumes # per week(free+paid)')
+
 			const response = await fetch('/api/core/freeConsumes?since='+from+'&limit='+to);
-			const data = await response.json();
-            for (const [key, value] of Object.entries(data)){
-                chartFreeConsumes.data.labels.push(key)
-                chartFreeConsumes.data.datasets[0].data.push(value)
+			const freeData = await response.json();
+
+			const response2 = await fetch('/api/core/paidConsumes?since='+from+'&limit='+to);
+			const paidData = await response2.json();
+            for (const [key, value] of Object.entries(freeData)){
+                chartAllConsumes.data.labels.push(key)
+				chartNoOfConsumes.data.labels.push(key)
+                chartAllConsumes.data.datasets[0].data.push(value)
+				chartAllConsumes.data.datasets[1].data.push(paidData[key])
+				chartNoOfConsumes.data.datasets[0].data.push(value + paidData[key])
             }
-			chartFreeConsumes.update()
+			chartAllConsumes.update()
+			chartNoOfConsumes.update()
 		}
 
 		async function getOceanConsumes() {
