@@ -75,7 +75,8 @@
 		let to=Math.floor(Date.now() / 1000)
     	let from = to - 15780000
 		createCharts()
-		updateCharts()
+		updateCharts();
+		
 
 		async function refetch(obj){
 			switch(parseInt(obj.value)){
@@ -90,17 +91,22 @@
 					break
 			}
 			await updateCharts();
+			
 		}
 		async function updateCharts(){
-			getPublishedNfts();
-			getUniqueConsumers();
-			getWeeklyUniquePublishMarkets();
-			getMontlyUniquePublishMarkets();
-			getYearlyUniquePublishMarkets();
-			getUniquePublishMarkets();
-			getUniqueConsumeMarkets();
-			getFreeConsumes();
-			getOceanConsumes();
+			document.getElementById("perios").disabled = true;
+			let proms=[]
+			proms.push(getPublishedNfts())
+			proms.push(getUniqueConsumers())
+			proms.push(getWeeklyUniquePublishMarkets())
+			proms.push(getMontlyUniquePublishMarkets())
+			proms.push(getYearlyUniquePublishMarkets())
+			proms.push(getUniquePublishMarkets())
+			proms.push(getUniqueConsumeMarkets())
+			proms.push(getFreeConsumes())
+			proms.push(getOceanConsumes())
+			await Promise.all(proms)
+			document.getElementById("perios").disabled = false;
 
 		}
 
