@@ -101,7 +101,7 @@ async function getUniquePublishMarketsPerWeek(
     }
     for (const row of respJSON.data.tokens) {
       const key = getYearAndWeek(row.createdTimestamp)
-      nfts[key][row.publishMarketFeeAddress] = true
+      if (key) nfts[key][row.publishMarketFeeAddress] = true
     }
     // eslint-disable-next-line no-constant-condition
   } while (true)
@@ -138,7 +138,7 @@ async function getUniquePublishMarketsPerMonth(
     }
     for (const row of respJSON.data.tokens) {
       const key = getYearAndMonth(row.createdTimestamp)
-      nfts[key][row.publishMarketFeeAddress] = true
+      if (key) nfts[key][row.publishMarketFeeAddress] = true
     }
     // eslint-disable-next-line no-constant-condition
   } while (true)
@@ -175,7 +175,7 @@ async function getUniquePublishMarketsPerYear(
     }
     for (const row of respJSON.data.tokens) {
       const key = getYear(row.createdTimestamp)
-      nfts[key][row.publishMarketFeeAddress] = true
+      if (key) nfts[key][row.publishMarketFeeAddress] = true
     }
     // eslint-disable-next-line no-constant-condition
   } while (true)
@@ -205,6 +205,9 @@ async function getUniquePublishMarkets(chainId: number) {
       break
     }
     for (const row of respJSON.data.tokens) {
+      if (!row.publishMarketFeeAddress)
+        row.publishMarketFeeAddress =
+          '0x0000000000000000000000000000000000000000'
       nfts[row.publishMarketFeeAddress] = true
     }
     // eslint-disable-next-line no-constant-condition
