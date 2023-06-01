@@ -41,6 +41,7 @@ export async function getUniqueConsumersPerWeek(
     }
     for (const row of respJSON.data.orders) {
       const key = getYearAndWeek(row.createdTimestamp)
+      if (!(key in nfts)) nfts[key] = {}
       if (key) nfts[key][row.consumer.id] = true
     }
     // eslint-disable-next-line no-constant-condition
@@ -101,6 +102,7 @@ async function getUniquePublishMarketsPerWeek(
     }
     for (const row of respJSON.data.tokens) {
       const key = getYearAndWeek(row.createdTimestamp)
+      if (!(key in nfts)) nfts[key] = {}
       if (key) nfts[key][row.publishMarketFeeAddress] = true
     }
     // eslint-disable-next-line no-constant-condition
@@ -138,6 +140,7 @@ async function getUniquePublishMarketsPerMonth(
     }
     for (const row of respJSON.data.tokens) {
       const key = getYearAndMonth(row.createdTimestamp)
+      if (!(key in nfts)) nfts[key] = {}
       if (key) nfts[key][row.publishMarketFeeAddress] = true
     }
     // eslint-disable-next-line no-constant-condition
@@ -175,6 +178,7 @@ async function getUniquePublishMarketsPerYear(
     }
     for (const row of respJSON.data.tokens) {
       const key = getYear(row.createdTimestamp)
+      if (!(key in nfts)) nfts[key] = {}
       if (key) nfts[key][row.publishMarketFeeAddress] = true
     }
     // eslint-disable-next-line no-constant-condition
@@ -326,8 +330,10 @@ export async function getUniqueConsumeMarketsPerWeek(
     }
     for (const row of respJSON.data.orders) {
       const key = getYearAndWeek(row.createdTimestamp)
-      if (row.consumerMarket && row.consumerMarket.id && key)
+      if (row.consumerMarket && row.consumerMarket.id && key) {
+        if (!(key in nfts)) nfts[key] = {}
         nfts[key][row.consumerMarket.id] = true
+      }
     }
     // eslint-disable-next-line no-constant-condition
   } while (true)
