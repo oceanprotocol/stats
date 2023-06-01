@@ -41,7 +41,7 @@ export async function getUniqueConsumersPerWeek(
     }
     for (const row of respJSON.data.orders) {
       const key = getYearAndWeek(row.createdTimestamp)
-      nfts[key][row.consumer.id] = true
+      if (key) nfts[key][row.consumer.id] = true
     }
     // eslint-disable-next-line no-constant-condition
   } while (true)
@@ -326,7 +326,7 @@ export async function getUniqueConsumeMarketsPerWeek(
     }
     for (const row of respJSON.data.orders) {
       const key = getYearAndWeek(row.createdTimestamp)
-      if (row.consumerMarket && row.consumerMarket.id)
+      if (row.consumerMarket && row.consumerMarket.id && key)
         nfts[key][row.consumerMarket.id] = true
     }
     // eslint-disable-next-line no-constant-condition
@@ -506,7 +506,7 @@ export async function getPaidOrdersPerChain(
     }
     for (const row of respJSON.data.orders) {
       const key = getYearAndWeek(row.createdTimestamp)
-      orders[key]++
+      if (key) orders[key]++
     }
     // eslint-disable-next-line no-constant-condition
   } while (true)
@@ -570,7 +570,7 @@ export async function getOceanOrdersPerChain(
     }
     for (const row of respJSON.data.orders) {
       const key = getYearAndWeek(row.createdTimestamp)
-      orders[key] += parseFloat(row.lastPriceValue)
+      if (key) orders[key] += parseFloat(row.lastPriceValue)
     }
     // eslint-disable-next-line no-constant-condition
   } while (true)
